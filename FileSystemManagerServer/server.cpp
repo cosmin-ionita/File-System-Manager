@@ -1,15 +1,17 @@
 #include <iostream>
 
-//SERVER
+#include "Connection.h"
 
 using namespace std;
 
-int main()
+
+int main(int argc, char** argv)
 {
+	Connection connection;
+
+	connection.initialize_connection(argv[1]);
 
 
 
-
-    cout << "This project will be the server" << endl;
     return 0;
 }
