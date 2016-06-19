@@ -22,7 +22,7 @@ bool UserManager::exist_user(string user_name)
 			return true;
 	}
 
-	cout<<"Utilizator inexistent";
+	cout<<"The user does not exist";
 
 	return false;
 }
@@ -69,8 +69,6 @@ bool UserManager::check_credentials(string user, string pass)
 
 	for(it = _users.begin(); it != _users.end(); it++) 
 	{
-		//cout<<"Verific cu: "<<(*it).name<<" si pass = "<<(*it).password<<endl;
-
 		if(((*it).name == user) && ((*it).password == pass))
 			return true;
 	}

@@ -26,7 +26,7 @@ class File
 			type = file_type;
 		}
 
-		bool operator==(const File file);	// Supraincarc acest operator pentru operatia de remove din STL
+		bool operator==(const File file);	// Overload this op for the "remove" method from STL
 
 		int dimension;
 

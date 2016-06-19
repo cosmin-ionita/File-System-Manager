@@ -92,7 +92,7 @@ void ServerConnection::initialize_server(char* port)
 void ServerConnection::select_handler() 
 {
 
-	if(!pending_transfers.empty()) 	// Doar daca am fisiere de transmis catre clienti (download pe client)
+	if(!pending_transfers.empty()) 	
 	{
 		TransferFile file = pending_transfers.front();
 
@@ -101,13 +101,13 @@ void ServerConnection::select_handler()
 		char buffer[4096];
 		memset(buffer, 0, 4096);
 
-		buffer[0] = 12;			// Cod de bloc de bytes
-
+		buffer[0] = 12;			// Bytes bloc code 
+        
 		int read_result = read(file.read_fd, buffer + 1, 4095);
 
-		if(read_result == 0)	// Daca am ajuns la finalul fisierului
+		if(read_result == 0)	// If I am at the end of the file
 		{
-			buffer[0] = 14;		//	Sfarsit de bloc de bytes
+			buffer[0] = 14;		//	End block - bytes
 
 			send_message(buffer, 1);
 
@@ -190,12 +190,12 @@ void ServerConnection::handle_login(UserManager user_manager, char* credentials)
 
 	if(user_manager.check_credentials(tokens[0], tokens[1])) 
 	{
-		_online_clients.push_back(tokens[0]);	// Adaug clientul in sesiunea curenta
+		_online_clients.push_back(tokens[0]);	// Add the client on the current session
 		_online_clients_fd.push_back(_current_client);
 
-		brute_force[_current_client] = 0;		// Actualizez vectorul de brute-force
+		brute_force[_current_client] = 0;		// Update the "brute force" vector
 
-		char message[1];						// Trimit success
+		char message[1];						// Send success
 		message[0] = 11; 
 
 		send_message(message, 1);
@@ -204,18 +204,18 @@ void ServerConnection::handle_login(UserManager user_manager, char* credentials)
 	{
 		char message[1];
 		
-		if(brute_force[_current_client] == 2)	// Brute force detectat
+		if(brute_force[_current_client] == 2)	// Brute force detected
 		{
-			FD_CLR(_current_client, &_read_fds);	// Inchid conexiunea
+			FD_CLR(_current_client, &_read_fds);	// Close the connection
 
-			message[0] = 13;					// Codul de brute-force
+			message[0] = 13;					// Brute force - code
 			send_message(message, 1);
 		}
 		else 
 		{
-			message[0] = 10; 					// Date incorecte
+			message[0] = 10; 					// Incorrect data
 
-			brute_force[_current_client]++;		// Posibil sa se incerce brute-force
+			brute_force[_current_client]++;		// Possible to try brute - force
 
 			send_message(message, 1);
 		}
@@ -232,13 +232,13 @@ void ServerConnection::handle_logout(char* user_name)
 
 	for(it = _online_clients.begin(); it != _online_clients.end(); it++)
 	{
-		if((*it) == name)	// Caut clientul in lista de clienti conectati
+		if((*it) == name)	// Searching the client in the connected clients list
 		{
 			break;
 		}
 		i++;
 	}
-							// Il sterg din lista de clienti conectati
+							// Delete the client from the connected clients list
 	_online_clients.erase(_online_clients.begin() + i);
 	_online_clients_fd.erase(_online_clients_fd.begin() + i);
 }
@@ -262,12 +262,11 @@ void ServerConnection::handle_getfilelist(char* user, FileSystem file_system, Us
 
 	memset(userName, 0, 100);
 
-	int lung = user[0] - 'A';			// Extrag lungimea numelui userului
+	int lung = user[0] - 'A';			// Extract the user name length
 
-	memcpy(userName, user + 1, lung);	// Extrag numele userului
+	memcpy(userName, user + 1, lung);	// Extract the user name
 
-	string user_name(userName);			// Fac conversie la string
-
+	string user_name(userName);			// Convert to string
 
 	if(user_manager.exist_user(user_name))
 	{
@@ -282,9 +281,9 @@ void ServerConnection::handle_getfilelist(char* user, FileSystem file_system, Us
 	{
 		char buffer[4096];
 
-		buffer[0] = 10;					// Cod de eroare
+		buffer[0] = 10;					// Error code 
 
-		strcpy(buffer + 1, "-11 Utilizator inexistent\n");
+		strcpy(buffer + 1, "-11 The user does not exist\n");
 
 		send_message(buffer, strlen(buffer));
 	}
@@ -313,9 +312,9 @@ void ServerConnection::handle_share(char* file_info, FileSystem &file_system)
 		char buffer[4096];
 		memset(buffer, 0, 4096);
 
-		buffer[0] = 10;			// Eroare
+		buffer[0] = 10;			// Error
 
-		memcpy(buffer + 1, "-4 Fisier inexistent\n", 22);
+		memcpy(buffer + 1, "-4 The file does not exist\n", 22);
 
 		send_message(buffer, strlen(buffer + 1) + 1);
 	}
@@ -342,9 +341,9 @@ void ServerConnection::handle_unshare(char* file_info, FileSystem &file_system)
 		char buffer[4096];
 		memset(buffer, 0, 4096);
 
-		buffer[0] = 10;			// Eroare
+		buffer[0] = 10;			// Error
 
-		memcpy(buffer + 1, "-4 Fisier inexistent", 20);
+		memcpy(buffer + 1, "-4 The file does not exist", 20);
 
 		send_message(buffer, strlen(buffer + 1) + 1);
 	}
@@ -374,9 +373,9 @@ void ServerConnection::handle_delete(char* file_info, FileSystem &file_system)
 		char buffer[50];
 		memset(buffer, 0, 50);
 
-		buffer[0] = 10;				// Eroare
+		buffer[0] = 10;				// Error
 
-		strcpy(buffer + 1, "-10 Fisier in curs de transfer\n");
+		strcpy(buffer + 1, "-10 The file is in a pending transfer\n");
 
 		send_message(buffer, 33);
 	}
@@ -397,7 +396,7 @@ void ServerConnection::handle_delete(char* file_info, FileSystem &file_system)
 
 		buffer[0] = 10;				// Eroare
 
-		memcpy(buffer + 1, "-4 Fisier inexistent\n", 22);
+		memcpy(buffer + 1, "-4 The file does not exist\n", 22);
 
 		send_message(buffer, strlen(buffer + 1) + 1);
 	}
@@ -415,7 +414,7 @@ void ServerConnection::handle_upload(char* file_name, FileSystem file_system)
 		char buffer[4096];
 		memset(buffer, 0, 4096);
 
-		buffer[0] = 10;					// Eroare, fisierul deja exista pe server
+		buffer[0] = 10;					//Error, the file exists on the server
 		send_message(buffer, 1);
 	}
 	else
@@ -425,9 +424,9 @@ void ServerConnection::handle_upload(char* file_name, FileSystem file_system)
 
 		buffer[0] = 11;					// Success
 
-		TransferFile file;				// Obiectul corespunzator unui transfer
+		TransferFile file;				// The transfer - object
 
-		file.name = tokens[1];			// Setez parametrii fisierului de transfer
+		file.name = tokens[1];			// Set the parameters of the transfer - object
 		file.op_type = 0;		
 		file.dest_socket = _current_client;
 
@@ -437,11 +436,11 @@ void ServerConnection::handle_upload(char* file_name, FileSystem file_system)
 		path += "/";
 		path += tokens[1];
 
-		int fd = creat(path.c_str(), S_IRUSR | S_IXUSR);	// Creez fisierul
+		int fd = creat(path.c_str(), S_IRUSR | S_IXUSR);	// Creating the file
 
 		file.write_fd = fd;
 
-		pending_transfers.push(file);				// Adaug obiectul in coada de transferuri
+		pending_transfers.push(file);				// Add the object in the transfer queue
 		unfinished_transfers.push_back(tokens[1]);
 
 		memcpy(buffer + 1, tokens[1].c_str(), tokens[1].size());		
@@ -518,10 +517,10 @@ void ServerConnection::handle_download(char* args, FileSystem file_system)
 			memset(buffer, 0, 4096);
 
 			
-			TransferFile file;				// Obiectul corespunzator unui transfer
+			TransferFile file;				
 
-			file.name = tokens[1];			// Setez parametrii fisierului de transfer
-			file.op_type = 1;				// upload (de pe server fac upload catre client)		
+			file.name = tokens[1];			
+			file.op_type = 1;				// upload 
 			file.dest_socket = _current_client;
 
 			string path = "";
@@ -530,11 +529,11 @@ void ServerConnection::handle_download(char* args, FileSystem file_system)
 			path += "/";
 			path += tokens[1];
 
-			int fd = open(path.c_str(), O_RDONLY);	// Deschid fisierul
+			int fd = open(path.c_str(), O_RDONLY);	// Open the file
 
 			file.read_fd = fd;
 
-			pending_transfers.push(file);				// Adaug obiectul in coada de transferuri
+			pending_transfers.push(file);				// Add the object in the transfer queue
 			unfinished_transfers.push_back(tokens[1]);
 
 			buffer[0] = 11;					// Success
@@ -547,9 +546,9 @@ void ServerConnection::handle_download(char* args, FileSystem file_system)
 			char buffer[4096];
 			memset(buffer, 0, 4096);
 
-			buffer[0] = 10;			// Eroare
+			buffer[0] = 10;			// Error
 
-			memcpy(buffer + 1, "-5 Descarcare interzisa\n", 26);
+			memcpy(buffer + 1, "-5 Denied download\n", 26);
 
 			send_message(buffer, strlen(buffer + 1) + 1);
 		}
@@ -559,9 +558,9 @@ void ServerConnection::handle_download(char* args, FileSystem file_system)
 		char buffer[4096];
 		memset(buffer, 0, 4096);
 
-		buffer[0] = 10;			// Eroare
+		buffer[0] = 10;			// Err
 
-		memcpy(buffer + 1, "-4 Fisier inexistent\n", 22);
+		memcpy(buffer + 1, "-4 The file does not exist\n", 22);
 
 		send_message(buffer, strlen(buffer + 1) + 1);
 	}

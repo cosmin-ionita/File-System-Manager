@@ -2,8 +2,8 @@
 #define MESSAGE_H
 
 /*
-	Structura mesajului:
-
+	Message structure
+    
 	+----+--------------+
 	|	 |				|
 	| ID |	  PAYLOAD	|

@@ -27,8 +27,8 @@
 using namespace std;
 
 
-ofstream log;				// File descriptorul fisierului de log
-bool exit_token = false;		// Token pentru comanda quit
+ofstream log;				// File descriptor for the log file
+bool exit_token = false;	// Token for the "quit" command
 
 //____________________SPLIT________________________
 
@@ -79,7 +79,7 @@ void ClientConnection::handle_response()
 
 	if(_last_command == "login")
 	{
-		if(buffer[0] == 11)	// success
+		if(buffer[0] == 11)	    // success
 		{
 			_prompt = _client_name;
 			_prompt += " > ";
@@ -148,9 +148,9 @@ void ClientConnection::handle_response()
 	}
 	else if(_last_command == "upload")
 	{
-		if(buffer[0] == 11)		// serverul trimite inapoi 11nume_fisier
+		if(buffer[0] == 11)		// the server sends back: 11file_name
 		{
-			TransferFile file;	// Obiectul aferent transferului in curs
+			TransferFile file;	// The object of the current file transfer
 
 			int fd = open(buffer + 1, O_RDONLY);
 
@@ -168,19 +168,19 @@ void ClientConnection::handle_response()
 		}
 		else 
 		{
-			cout<<"-9 Fisier existent pe server"<<endl<<flush;
+			cout<<"-9 The file exists on server"<<endl<<flush;
 			cout<<_prompt<<flush;
 
-			log<<"-9 Fisier existent pe server"<<endl<<flush;
+			log<<"-9 The file exists on server"<<endl<<flush;
 			log<<_prompt<<flush;
 		}
 	}
 	else if(_last_command == "download")
 	{
 
-		if(buffer[0] == 11)		// serverul trimite inapoi 11nume_fisier
+		if(buffer[0] == 11)		// the server sends back: 11file_name
 		{
-			TransferFile file;	// Obiectul aferent transferului in curs
+			TransferFile file;	// The object of the current file transfer
 
 			int fd = creat(buffer + 1, O_WRONLY);
 
@@ -197,9 +197,6 @@ void ClientConnection::handle_response()
 		}
 		else 
 		{
-			//cout<<buffer + 1<<flush;
-			//cout<<_prompt<<flush;
-
 			log<<buffer + 1<<flush;
 			log<<_prompt<<flush;
 		}
@@ -209,13 +206,13 @@ void ClientConnection::handle_response()
 void ClientConnection::handle_login(string user, string pass)
 {
 	
-	if(_client_name == "")	// Daca nu sunt logat
+	if(_client_name == "")	// If I am not logged in
 	{
 		int size = user.size() + pass.size() + 1;
 
 		char* content = (char*)malloc(size * sizeof(char));
 
-		content[0] = 1;			// Cod de login
+		content[0] = 1;			// Login code
 
 		strcpy(content + 1, user.c_str());
 		strcat(content, " ");
@@ -230,20 +227,20 @@ void ClientConnection::handle_login(string user, string pass)
 	}
 	else 
 	{
-		cout<<"-2 Sesiune deja deschisa"<<endl<<flush;
+		cout<<"-2 Session already open"<<endl<<flush;
 		cout<<_prompt<<flush;
 	}
 }
 
 void ClientConnection::handle_logout()
 {
-							// Trimite semnal la server sa inchida sesiunea
+							// Send a signal to server to close the connection
 	if(_client_name != "") 
 	{
 		char message[4096];
 		memset(message, 0, 4096);
 
-		message[0] = 2;		// Cod de logout
+		message[0] = 2;		// Logout code
 
 		memcpy(message + 1, _client_name.c_str(), strlen(_client_name.c_str()));
 
@@ -257,10 +254,10 @@ void ClientConnection::handle_logout()
 	}
 	else 
 	{
-		cout<<"-1 Client neautentificat"<<endl<<flush;
+		cout<<"-1 The client is not authenticated"<<endl<<flush;
 		cout<<_prompt<<flush;
 
-		log<<"-1 Client neautentificat"<<endl<<flush;
+		log<<"-1 The client is not authenticated"<<endl<<flush;
 		log<<_prompt<<flush;		
 	}
 }
@@ -272,17 +269,17 @@ void ClientConnection::handle_getuserlist()
 		char message[1];
 
 		memset(message, 0, 1);
-		message[0] = 4;		 // Cod de getuserlist
+		message[0] = 4;		 // GetUserList command-code
 
 		_last_command = "getuserlist";
 		send_message(message, 1);
 	}
 	else 
 	{
-		cout<<"-1 Client neautentificat"<<endl<<flush;
+		cout<<"-1 The client is not authenticated"<<endl<<flush;
 		cout<<_prompt<<flush;	
 
-		log<<"-1 Client neautentificat"<<endl<<flush;
+		log<<"-1 The client is not authenticated"<<endl<<flush;
 		log<<_prompt<<flush;	
 	}
 }
@@ -306,10 +303,10 @@ void ClientConnection::handle_getfilelist(string user)
 	}
 	else 
 	{
-		cout<<"-1 Client neautentificat"<<endl<<flush;
+		cout<<"-1 The client is not authenticated"<<endl<<flush;
 		cout<<_prompt<<flush;	
 
-		log<<"-1 Client neautentificat"<<endl<<flush;
+		log<<"-1 The client is not authenticated"<<endl<<flush;
 		log<<_prompt<<flush;	
 	}
 }
@@ -319,11 +316,11 @@ void ClientConnection::handle_share(string file_name)
 	if(_client_name != "")
 	{
 		char message[4096];
-		message[0] = 7;				// Cod de share
+		message[0] = 7;				// Share code
 
 		string full_message = "";
 
-		full_message += _client_name;	// Adaug numele clientului in mesaj pentru identificare pe server
+		full_message += _client_name;	// Add client name for server identification
 		full_message += " ";
 		full_message += file_name;
 
@@ -334,10 +331,10 @@ void ClientConnection::handle_share(string file_name)
 	}
 	else 
 	{
-		cout<<"-1 Client neautentificat"<<endl<<flush;
+		cout<<"-1  The client is not authenticated"<<endl<<flush;
 		cout<<_prompt<<flush;
 
-		log<<"-1 Client neautentificat"<<endl<<flush;
+		log<<"-1  The client is not authenticated"<<endl<<flush;
 		log<<_prompt<<flush;	
 	}
 }
@@ -347,11 +344,11 @@ void ClientConnection::handle_unshare(string file_name)
 	if(_client_name != "")
 	{
 		char message[4096];
-		message[0] = 8;			//Cod de unshare
+		message[0] = 8;			// Unshare code
 
 		string full_message = "";
 
-		full_message += _client_name;	// Adaug numele clientului in mesaj pentru identificare pe server
+		full_message += _client_name;	// Add client name for server identification
 		full_message += " ";
 		full_message += file_name;
 
@@ -362,10 +359,10 @@ void ClientConnection::handle_unshare(string file_name)
 	}
 	else 
 	{
-		cout<<"-1 Client neautentificat"<<endl<<flush;
+		cout<<"-1 The client is not authenticated"<<endl<<flush;
 		cout<<_prompt<<flush;
 
-		log<<"-1 Client neautentificat"<<endl<<flush;
+		log<<"-1 The client is not authenticated"<<endl<<flush;
 		log<<_prompt<<flush;		
 	}
 }
@@ -376,11 +373,11 @@ void ClientConnection::handle_delete(string file_name)
 	{
 		char message[4096];
 
-		message[0] = 9;			// Cod de delete
+		message[0] = 9;			// Delete code 
 
 		string full_message = "";
 
-		full_message += _client_name;	// Adaug numele clientului in mesaj pentru identificare pe server
+		full_message += _client_name;	// Adding client-name for server identification
 		full_message += " ";
 		full_message += file_name;
 
@@ -391,10 +388,10 @@ void ClientConnection::handle_delete(string file_name)
 	}
 	else 
 	{
-		cout<<"-1 Client neautentificat"<<endl<<flush;
+		cout<<"-1 The client is not authenticated"<<endl<<flush;
 		cout<<_prompt<<flush;
 
-		log<<"-1 Client neautentificat"<<endl<<flush;
+		log<<"-1 The client is not authenticated"<<endl<<flush;
 		log<<_prompt<<flush;	
 	}
 }
@@ -416,12 +413,8 @@ bool ClientConnection::exist_file(const char* directory_name, const char* file_n
 		  	closedir (dir);
 	} 
 	else 
-	{
-	   //cout<<"Directorul nu poate fi deschis"<<endl;
 	   return false;
-	}
-
-	//cout<<"Fisierul "<<file_name<<" nu exista"<<endl;
+       
 	return false;
 }
 
@@ -431,7 +424,7 @@ void ClientConnection::handle_upload(string file_name)
 	{
 		char message[4096];
 
-		message[0] = 5;		// Cod de upload
+		message[0] = 5;		// Upload code
 
 		string full_message = "";
 
@@ -447,10 +440,10 @@ void ClientConnection::handle_upload(string file_name)
 	}
 	else
 	{
-		cout<<"-4 Fisier inexistent"<<endl<<flush;
+		cout<<"-4 The file does not exist"<<endl<<flush;
 		cout<<_prompt<<flush;
 
-		log<<"-4 Fisier inexistent"<<endl<<flush;
+		log<<"-4 The file does not exist"<<endl<<flush;
 		log<<_prompt<<flush;
 	}
 }
@@ -472,7 +465,7 @@ void ClientConnection::handle_download(string user, string file)
 
 	char* content = (char*)malloc(size * sizeof(char));
 
-	content[0] = 6;			// Cod de download
+	content[0] = 6;			// Download code
 
 	strcpy(content + 1, user.c_str());
 	strcat(content, " ");
@@ -493,8 +486,8 @@ void ClientConnection::handle_stdin()
 
 	if(buffer == "")
 	{
-		cout<<"Comanda invalida"<<endl<<flush;
-		log<<"Comanda invalida"<<endl<<flush;
+		cout<<"Invalid command"<<endl<<flush;
+		log<<"Invalid command"<<endl<<flush;
 
 		cout<<_prompt<<flush;
 		log<<_prompt<<flush;
@@ -534,10 +527,10 @@ void ClientConnection::handle_stdin()
 				handle_quit();
 		else 
 		{
-			cout<<"Comanda invalida"<<endl<<flush;
+			cout<<"Invalid command"<<endl<<flush;
 			cout<<_prompt<<flush;
 
-			log<<"Comanda invalida"<<endl<<flush;
+			log<<"Invalid command"<<endl<<flush;
 			log<<_prompt<<flush;
 		}
 	}
@@ -556,13 +549,13 @@ void ClientConnection::select_handler()
 			char buffer[4096];
 			memset(buffer, 0, 4096);
 
-			buffer[0] = 12;			// Cod de bloc de bytes
+			buffer[0] = 12;			// Bytes - bloc code
 
 			int read_result = read(file.read_fd, buffer + 1, 4095);
 
-			if(read_result == 0)	// Daca am ajuns la finalul fisierului
+			if(read_result == 0)	// If I am at the end of file
 			{
-				buffer[0] = 14;		//	Sfarsit de bloc de bytes
+				buffer[0] = 14;		//	End bytes - block
 
 				send_message(buffer, 1);
 
@@ -578,11 +571,10 @@ void ClientConnection::select_handler()
 			{
 				pending_transfers.push(file);
 
-				//cout<<"Am trimis: "<<read_result + 1<<" bytes"<<endl<<flush;
 				send_message(buffer, read_result + 1);
 			}
 		}
-		else if(file.op_type == 2)	// primesc ceva de la server, deci fac download
+		else if(file.op_type == 2)	// Receive data, so the command is "download"
 		{
 			char buffer[4096];
 			memset(buffer, 0, 4096);
@@ -597,10 +589,8 @@ void ClientConnection::select_handler()
 			}
 			else if(buffer[0] == 14)	// end data block
 			{
-				//cout<<"Download finished: "<<file.name<<" - "<<file.dimension<<" bytes "<<endl<<flush;
 				log<<"Download finished: "<<file.name<<" - "<<file.dimension<<" bytes "<<endl<<flush;
 
-				//cout<<_prompt<<flush;
 				log<<_prompt<<flush;
 
 				close(file.write_fd);
@@ -623,10 +613,10 @@ void ClientConnection::select_handler()
 
 	int select_result = 0;
 
-	if(!pending_transfers.empty())			// Daca am transferuri in curs, astept doar 10 ms
+	if(!pending_transfers.empty())			// If I have pending transfers, wait 10 ms
 		select_result = select(_max_fd_range + 1, &_tmp_fds, NULL, NULL, &tv);
 
-	else if(exit_token == false)			// Altfel, astept pana cand am input de la user sau mesaj de la server
+	else if(exit_token == false)			// Otherwise, wait until there is user input or server response
 		select_result = select(_max_fd_range + 1, &_tmp_fds, NULL, NULL, NULL);
 
 	is_valid(select_result, "select");

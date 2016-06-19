@@ -68,15 +68,15 @@ bool FileSystem::exist_file(const char* directory_name, const char* file_name)
 	} 
 	else 
 	{
-	   cout<<"Directorul nu poate fi deschis"<<endl;
+	   cout<<"The directory cannot be opened"<<endl;
 	   return false;
 	}
 
-	cout<<"Fisierul "<<file_name<<" nu exista"<<endl;
+	cout<<"The file "<<file_name<<" does not exist"<<endl;
 	return false;
 }
 
-// Intoarce dimensiunea unui fisier
+// Returns the size of a file
 
 long FileSystem::get_file_dimension(string directory_name, string file_name)
 {
@@ -94,7 +94,7 @@ long FileSystem::get_file_dimension(string directory_name, string file_name)
     return rc == 0 ? stat_buf.st_size : -1;
 }
 
-// Verific daca fisierul dat ca parametru este deja incarcat in sistem
+// Check if the file is already loaded into the system
 
 bool FileSystem::is_loaded_file(char* file_name)
 {
@@ -116,7 +116,7 @@ void FileSystem::add_file(string user_name, string file_name)
 }
 
 
-// In aceasta functie incarc fisierele publice ale fiecarui utilizator
+// Load public files of each user
 
 void FileSystem::load_files(UserManager user_manager, char* file_name)
 {
@@ -127,7 +127,7 @@ void FileSystem::load_files(UserManager user_manager, char* file_name)
 
 	f>>N;
 
-	getline(f, line);	// Citesc un newline inainte
+	getline(f, line);	// Read a newline before
 
 	for(int i = 0; i<N; i++)
 	{
@@ -143,7 +143,7 @@ void FileSystem::load_files(UserManager user_manager, char* file_name)
 		}	
 	}
 
-	// Adaug fisierele private (cele care sunt deja in folderul userului)
+	// Add private files
 
 	list<string>::iterator it;
 
@@ -227,17 +227,17 @@ void FileSystem::delete_file(string directory, string file)
 {
 	string remove_path = "";
 
-	remove_path += directory;			// Construiesc calea fisierului de sters
+	remove_path += directory;			// Build the path of the current file
 	remove_path += "/";
 	remove_path += file;
 
-	unlink(remove_path.c_str());		// Sterg fisierul de pe disc
+	unlink(remove_path.c_str());		// Delete the file (on disk)
 
 	int i = 0;
 	
 	list<File>::iterator it;
 
-	for(it = _files.begin(); it != _files.end(); it++) // Sterg fisierul din sistem
+	for(it = _files.begin(); it != _files.end(); it++) // Delete the file from the system
 	{
 		if(((*it).owner == directory) && ((*it).name == file))
 		{
