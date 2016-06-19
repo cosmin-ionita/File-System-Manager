@@ -9,5 +9,7 @@ The clients can transfer files (via download / upload commands) to (from) the se
 with the size greater than that limit has to be split in chunks, transfered and then reassembled to create the initial file, exactly as TCP does. Many clients can
 transfer files in the same time, so the server has to keep track of each chunk.
 
+![FSM_Architecture](https://github.com/ionitacosmin95/File-System-Manager/blob/master/Images/file_system_manager.png)
+
 
 
